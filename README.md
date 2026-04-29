@@ -113,8 +113,5 @@ To generate the volcano plot, load `annotated_DEG_results.csv` when prompted and
 
 > **Note:** The log2FC threshold of 50 is intentionally stringent for this assignment and may differ from thresholds used in publication-grade analyses (typically 1–2).
 
----
-
-## Author
 
 **Mehak Khemka**
