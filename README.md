@@ -1,6 +1,12 @@
 # Differential Gene Expression Analysis in Alzheimer's Disease
 
-Identification of differentially expressed genes between Alzheimer's disease and control brain tissue samples using publicly available microarray data (GSE5281) and R.
+> Identifying significantly dysregulated genes and biological pathways between AD and control brain tissue using GEO dataset GSE5281.
+
+---
+
+## Objective
+
+To identify significantly upregulated and downregulated genes between Alzheimer's disease and control brain tissue samples, and explore their biological significance through functional enrichment analysis.
 
 ---
 
@@ -8,110 +14,86 @@ Identification of differentially expressed genes between Alzheimer's disease and
 
 | Field | Details |
 |---|---|
-| **Source** | [NCBI Gene Expression Omnibus (GEO)](https://www.ncbi.nlm.nih.gov/geo/) |
+| **Source** | [Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/) |
 | **Accession** | GSE5281 |
-| **Disorder** | Alzheimer's disease |
-| **Organism** | *Homo sapiens* |
-| **Sample type** | Post-mortem brain tissue |
-| **Platform** | GPL570 — Affymetrix Human Genome U133 Plus 2.0 Array |
-| **Samples** | 161 total (74 affected, 87 control) |
+| **Total Samples** | 161 |
+| **AD / Control** | 74 Alzheimer's / 87 Control |
+| **Platform** | Affymetrix Human Genome U133 Plus 2.0 Array |
 
 ---
 
-## Objectives
+## Workflow
 
-1. Retrieve and preprocess the microarray dataset GSE5281 from GEO.
-2. Perform differential gene expression (DEG) analysis between Alzheimer's disease and control samples using R.
-3. Identify significantly upregulated and downregulated genes associated with Alzheimer's disease.
-4. Visualize DEG results with a volcano plot.
-
----
-
-## Experimental Design
-
-GSE5281 follows a **case–control** design. Brain tissue RNA from post-mortem subjects (Alzheimer's vs. cognitively normal) was hybridized onto Affymetrix arrays. Expression levels were normalized and samples grouped into disease and control categories for comparative analysis.
+| Step | Description |
+|---|---|
+| 01 | Data retrieval using **GEOquery** |
+| 02 | Preprocessing and normalization |
+| 03 | Sample grouping (Alzheimer's vs Control) |
+| 04 | Differential expression analysis using **limma** (adjusted p-value, log2FC filtering) |
+| 05 | Visualization — Volcano plot, PCA, Heatmap |
+| 06 | Functional enrichment — GO and KEGG |
 
 ---
 
-## Methods
+## Results
 
-### Tools & Packages
+### 🌋 Volcano Plot
+Visualizes significantly upregulated and downregulated genes between AD and control samples.
 
-- **R** with Bioconductor
-- [`GEOquery`](https://bioconductor.org/packages/GEOquery/) — dataset retrieval
-- [`limma`](https://bioconductor.org/packages/limma/) — linear modeling and empirical Bayes moderation
-- [`EnhancedVolcano`](https://bioconductor.org/packages/EnhancedVolcano/) — volcano plot visualization
-- `ggplot2`, `ggrepel`, `dplyr` — data manipulation and plotting
+### 📉 PCA Plot
+Shows separation between Alzheimer's and control sample groups in principal component space.
 
-### Analysis Pipeline
+### 🔥 Heatmap
+Displays expression patterns of top differentially expressed genes across all samples.
 
-1. Download dataset from GEO using `getGEO("GSE5281")`
-2. Extract expression matrix and phenotype data
-3. Classify samples into `affected` and `control` groups
-4. Build design matrix and fit linear model with `lmFit`
-5. Define contrasts (`affected vs. control`) and apply empirical Bayes with `eBayes`
-6. Extract DEGs using `topTable` (Benjamini–Hochberg FDR correction)
-7. Filter by **adjusted p-value < 0.005** and **|log2 fold change| > 50**
-8. Annotate results and generate volcano plot
+### 🧬 GO Enrichment
+Highlights enriched biological processes such as neuronal signalling and cellular stress response.
+
+### 🧪 KEGG Pathways
+Identifies disrupted pathways related to neurodegeneration and altered metabolism.
 
 ---
 
-## Outputs
+## Output Files
 
 | File | Description |
 |---|---|
-| `GSE5281_DEGs.csv` | Filtered list of significant DEGs |
-| `annotated_DEG_results.csv` | DEGs annotated with gene symbols |
-| Volcano plot | Visual summary of expression changes (log2FC vs. adjusted p-value) |
+| `DEGs.csv` | Filtered list of significant differentially expressed genes |
+| `volcano.png` | Volcano plot |
+| `PCA_plot.png` | PCA visualization |
+| `heatmap.png` | Heatmap of top genes |
+| `GO_barplot.png` | GO enrichment bar plot |
+| `KEGG_dotplot.png` | KEGG pathway dot plot |
 
 ---
 
-## Usage
+## Tools & Packages
 
-### Prerequisites
+- **R**
+- **GEOquery** — GEO data retrieval
+- **limma** — Differential expression analysis
+- **EnhancedVolcano** — Volcano plot
+- **pheatmap** — Heatmap visualization
+- **clusterProfiler** — GO and KEGG enrichment
 
-```r
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+---
 
-BiocManager::install(c("GEOquery", "limma", "EnhancedVolcano"))
-install.packages(c("ggplot2", "ggrepel", "dplyr"))
-```
-
-### Run the Analysis
-
-Open the R script in RStudio or run from the command line:
+## How to Run
 
 ```bash
-Rscript deg_analysis.R
+# Clone the repository
+git clone https://github.com/yourusername/repo-name.git
+cd repo-name
 ```
 
-To generate the volcano plot, load `annotated_DEG_results.csv` when prompted and the plot will render using `EnhancedVolcano`.
+Then in R:
 
----
-
-## Repository Structure
-
-```
-.
-├── deg_analysis.R            # Main R script
-├── annotations.csv           # Probe-to-gene symbol annotation file
-├── GSE5281_DEGs.csv          # Filtered DEG results (generated)
-├── annotated_DEG_results.csv # Annotated DEG results (generated)
-└── README.md
+```r
+source("main_script.R")
 ```
 
 ---
 
-## Significance Thresholds
+## Key Insight
 
-| Parameter | Threshold |
-|---|---|
-| Adjusted p-value | < 0.005 |
-| \|log2 fold change\| | > 50 |
-| FDR method | Benjamini–Hochberg |
-
-> **Note:** The log2FC threshold of 50 is intentionally stringent for this assignment and may differ from thresholds used in publication-grade analyses (typically 1–2).
-
-
-**Mehak Khemka**
+The analysis identifies significant gene expression changes between Alzheimer's and control brain tissue. Enriched biological processes point to disrupted neuronal function and elevated cellular stress, while KEGG results highlight affected neurodegenerative and metabolic pathways as hallmarks of disease.
