@@ -1,16 +1,16 @@
-# 🧬 Differential Gene Expression Analysis in Alzheimer's Disease
+# Differential Gene Expression Analysis in Alzheimer's Disease
 
 > Identifying significantly dysregulated genes and biological pathways between AD and control brain tissue using GEO dataset GSE5281.
 
 ---
 
-## 🎯 Objective
+## Objective
 
 To identify significantly upregulated and downregulated genes between Alzheimer's disease and control brain tissue samples, and explore their biological significance through functional enrichment analysis.
 
 ---
 
-## 🧬 Dataset
+## Dataset
 
 | Field | Details |
 |---|---|
@@ -22,7 +22,7 @@ To identify significantly upregulated and downregulated genes between Alzheimer'
 
 ---
 
-## ⚙️ Workflow
+## Workflow
 
 | Step | Description |
 |---|---|
@@ -35,7 +35,7 @@ To identify significantly upregulated and downregulated genes between Alzheimer'
 
 ---
 
-## 📈 Results
+## Results
 
 ### 🌋 Volcano Plot
 Visualizes significantly upregulated and downregulated genes between AD and control samples.
@@ -54,7 +54,7 @@ Identifies disrupted pathways related to neurodegeneration and altered metabolis
 
 ---
 
-## 📂 Output Files
+## Output Files
 
 | File | Description |
 |---|---|
@@ -67,7 +67,7 @@ Identifies disrupted pathways related to neurodegeneration and altered metabolis
 
 ---
 
-## 🛠️ Tools & Packages
+## Tools & Packages
 
 - **R**
 - **GEOquery** — GEO data retrieval
@@ -78,7 +78,7 @@ Identifies disrupted pathways related to neurodegeneration and altered metabolis
 
 ---
 
-## ▶️ How to Run
+## How to Run
 
 ```bash
 # Clone the repository
@@ -94,6 +94,6 @@ source("main_script.R")
 
 ---
 
-## 📌 Key Insight
+## Key Insight
 
 The analysis identifies significant gene expression changes between Alzheimer's and control brain tissue. Enriched biological processes point to disrupted neuronal function and elevated cellular stress, while KEGG results highlight affected neurodegenerative and metabolic pathways as hallmarks of disease.
