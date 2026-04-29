@@ -1,117 +1,48 @@
-# Differential Gene Expression Analysis in Alzheimer's Disease
+**Differential Gene Expression Analysis in Alzheimer's Disease**
 
-Identification of differentially expressed genes between Alzheimer's disease and control brain tissue samples using publicly available microarray data (GSE5281) and R.
-
----
-
-## Dataset
-
-| Field | Details |
-|---|---|
-| **Source** | [NCBI Gene Expression Omnibus (GEO)](https://www.ncbi.nlm.nih.gov/geo/) |
-| **Accession** | GSE5281 |
-| **Disorder** | Alzheimer's disease |
-| **Organism** | *Homo sapiens* |
-| **Sample type** | Post-mortem brain tissue |
-| **Platform** | GPL570 — Affymetrix Human Genome U133 Plus 2.0 Array |
-| **Samples** | 161 total (74 affected, 87 control) |
-
----
-
-## Objectives
-
-1. Retrieve and preprocess the microarray dataset GSE5281 from GEO.
-2. Perform differential gene expression (DEG) analysis between Alzheimer's disease and control samples using R.
-3. Identify significantly upregulated and downregulated genes associated with Alzheimer's disease.
-4. Visualize DEG results with a volcano plot.
-
----
-
-## Experimental Design
-
-GSE5281 follows a **case–control** design. Brain tissue RNA from post-mortem subjects (Alzheimer's vs. cognitively normal) was hybridized onto Affymetrix arrays. Expression levels were normalized and samples grouped into disease and control categories for comparative analysis.
-
----
-
-## Methods
-
-### Tools & Packages
-
-- **R** with Bioconductor
-- [`GEOquery`](https://bioconductor.org/packages/GEOquery/) — dataset retrieval
-- [`limma`](https://bioconductor.org/packages/limma/) — linear modeling and empirical Bayes moderation
-- [`EnhancedVolcano`](https://bioconductor.org/packages/EnhancedVolcano/) — volcano plot visualization
-- `ggplot2`, `ggrepel`, `dplyr` — data manipulation and plotting
-
-### Analysis Pipeline
-
-1. Download dataset from GEO using `getGEO("GSE5281")`
-2. Extract expression matrix and phenotype data
-3. Classify samples into `affected` and `control` groups
-4. Build design matrix and fit linear model with `lmFit`
-5. Define contrasts (`affected vs. control`) and apply empirical Bayes with `eBayes`
-6. Extract DEGs using `topTable` (Benjamini–Hochberg FDR correction)
-7. Filter by **adjusted p-value < 0.005** and **|log2 fold change| > 50**
-8. Annotate results and generate volcano plot
-
----
-
-## Outputs
-
-| File | Description |
-|---|---|
-| `GSE5281_DEGs.csv` | Filtered list of significant DEGs |
-| `annotated_DEG_results.csv` | DEGs annotated with gene symbols |
-| Volcano plot | Visual summary of expression changes (log2FC vs. adjusted p-value) |
-
----
-
-## Usage
-
-### Prerequisites
-
-```r
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-
-BiocManager::install(c("GEOquery", "limma", "EnhancedVolcano"))
-install.packages(c("ggplot2", "ggrepel", "dplyr"))
-```
-
-### Run the Analysis
-
-Open the R script in RStudio or run from the command line:
-
-```bash
-Rscript deg_analysis.R
-```
-
-To generate the volcano plot, load `annotated_DEG_results.csv` when prompted and the plot will render using `EnhancedVolcano`.
-
----
-
-## Repository Structure
-
-```
-.
-├── deg_analysis.R            # Main R script
-├── annotations.csv           # Probe-to-gene symbol annotation file
-├── GSE5281_DEGs.csv          # Filtered DEG results (generated)
-├── annotated_DEG_results.csv # Annotated DEG results (generated)
-└── README.md
-```
-
----
-
-## Significance Thresholds
-
-| Parameter | Threshold |
-|---|---|
-| Adjusted p-value | < 0.005 |
-| \|log2 fold change\| | > 50 |
-| FDR method | Benjamini–Hochberg |
-
-> **Note:** The log2FC threshold of 50 is intentionally stringent for this assignment and may differ from thresholds used in publication-grade analyses (typically 1–2).
+Identifying significantly dysregulated genes and biological pathways between AD and control brain tissue using GEO dataset GSE5281.
 
 
-**Mehak Khemka**
+**Objective**
+To identify significantly upregulated and downregulated genes between Alzheimer's disease and control brain tissue samples, and explore their biological significance through functional enrichment analysis.
+
+**Dataset**
+FieldDetailsSourceGene Expression OmnibusAccessionGSE5281Total Samples161AD / Control74 Alzheimer's / 87 ControlPlatformAffymetrix Human Genome U133 Plus 2.0 Array
+
+**Workflow**
+StepDescription01Data retrieval using GEOquery02Preprocessing and normalization03Sample grouping (Alzheimer's vs Control)04Differential expression analysis using limma (adjusted p-value, log2FC filtering)05Visualization — Volcano plot, PCA, Heatmap06Functional enrichment — GO and KEGG
+
+**Results**
+🌋 Volcano Plot
+Visualizes significantly upregulated and downregulated genes between AD and control samples.
+📉 PCA Plot
+Shows separation between Alzheimer's and control sample groups in principal component space.
+🔥 Heatmap
+Displays expression patterns of top differentially expressed genes across all samples.
+🧬 GO Enrichment
+Highlights enriched biological processes such as neuronal signalling and cellular stress response.
+🧪 KEGG Pathways
+Identifies disrupted pathways related to neurodegeneration and altered metabolism.
+
+**Output Files**
+FileDescriptionDEGs.csvFiltered list of significant differentially expressed genesvolcano.pngVolcano plotPCA_plot.pngPCA visualizationheatmap.pngHeatmap of top genesGO_barplot.pngGO enrichment bar plotKEGG_dotplot.pngKEGG pathway dot plot
+
+**Tools & Packages**
+
+R
+GEOquery — GEO data retrieval
+limma — Differential expression analysis
+EnhancedVolcano — Volcano plot
+pheatmap — Heatmap visualization
+clusterProfiler — GO and KEGG enrichment
+
+
+▶️ How to Run
+bash# Clone the repository
+git clone https://github.com/yourusername/repo-name.git
+cd repo-name
+Then in R:
+rsource("main_script.R")
+
+📌 Key Insight
+The analysis identifies significant gene expression changes between Alzheimer's and control brain tissue. Enriched biological processes point to disrupted neuronal function and elevated cellular stress, while KEGG results highlight affected neurodegenerative and metabolic pathways as hallmarks of disease.
