@@ -1,12 +1,12 @@
 # Differential Gene Expression Analysis in Alzheimer's Disease
 
-> Identifying significantly dysregulated genes and biological pathways between AD and control brain tissue using GEO dataset GSE5281.
+Identifying significantly dysregulated genes and biological pathways between AD and control brain tissue using GEO dataset GSE5281.
 
 ---
 
 ## Objective
 
-To identify significantly upregulated and downregulated genes between Alzheimer's disease and control brain tissue samples, and explore their biological significance through functional enrichment analysis.
+To identify significantly upregulated and downregulated genes between Alzheimer's disease and control brain tissue, and explore their biological significance through functional enrichment analysis.
 
 ---
 
@@ -16,8 +16,8 @@ To identify significantly upregulated and downregulated genes between Alzheimer'
 |---|---|
 | **Source** | [Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/) |
 | **Accession** | GSE5281 |
-| **Total Samples** | 161 |
-| **AD / Control** | 74 Alzheimer's / 87 Control |
+| **Samples** | 161 (outliers removed post-QC) |
+| **AD / Control** | 74 / 87 |
 | **Platform** | Affymetrix Human Genome U133 Plus 2.0 Array |
 
 ---
@@ -26,31 +26,27 @@ To identify significantly upregulated and downregulated genes between Alzheimer'
 
 | Step | Description |
 |---|---|
-| 01 | Data retrieval using **GEOquery** |
-| 02 | Preprocessing and normalization |
-| 03 | Sample grouping (Alzheimer's vs Control) |
-| 04 | Differential expression analysis using **limma** (adjusted p-value, log2FC filtering) |
-| 05 | Visualization — Volcano plot, PCA, Heatmap |
-| 06 | Functional enrichment — GO and KEGG |
+| 01 | Data retrieval using GEOquery |
+| 02 | Log2 transformation and preprocessing |
+| 03 | Outlier removal (PCA-based, > 3 SD on PC1/PC2) |
+| 04 | Differential expression using limma (adj. p < 0.05, log2FC > 1) |
+| 05 | Volcano plot, PCA, Heatmap |
+| 06 | Probe-to-gene mapping via hgu133plus2.db |
+| 07 | GO and KEGG enrichment using top 500 DEGs |
 
 ---
 
 ## Results
 
-### 🌋 Volcano Plot
-Visualizes significantly upregulated and downregulated genes between AD and control samples.
+**Volcano Plot** — 16,454 DEGs identified; net upregulation bias observed in AD tissue after log2 transformation.
 
-### 📉 PCA Plot
-Shows separation between Alzheimer's and control sample groups in principal component space.
+**PCA Plot** — Moderate AD vs control separation after outlier removal, consistent with heterogeneous bulk brain tissue.
 
-### 🔥 Heatmap
-Displays expression patterns of top differentially expressed genes across all samples.
+**Heatmap** — Top 50 DEGs shown with gene symbols. Key genes include MT-ND6, STMN1, OLFM3, and FGF13.
 
-### 🧬 GO Enrichment
-Highlights enriched biological processes such as neuronal signalling and cellular stress response.
+**GO Enrichment** — Top processes: synaptic vesicle transport, aerobic respiration, mitochondrial membrane organisation, and cellular response to interferon.
 
-### 🧪 KEGG Pathways
-Identifies disrupted pathways related to neurodegeneration and altered metabolism.
+**KEGG Pathways** — Top hits: Alzheimer disease, Pathways of neurodegeneration, Oxidative phosphorylation, Synaptic vesicle cycle, Proteasome.
 
 ---
 
@@ -58,35 +54,29 @@ Identifies disrupted pathways related to neurodegeneration and altered metabolis
 
 | File | Description |
 |---|---|
-| `DEGs.csv` | Filtered list of significant differentially expressed genes |
+| `DEGs.csv` | Significant DEGs (adj. p < 0.05, log2FC > 1) |
 | `volcano.png` | Volcano plot |
-| `PCA_plot.png` | PCA visualization |
-| `heatmap.png` | Heatmap of top genes |
+| `PCA_plot.png` | PCA after outlier removal |
+| `heatmap.png` | Heatmap of top 50 DEGs with gene symbols |
 | `GO_barplot.png` | GO enrichment bar plot |
+| `GO_results.csv` | Full GO results table |
 | `KEGG_dotplot.png` | KEGG pathway dot plot |
+| `KEGG_results.csv` | Full KEGG results table |
 
 ---
 
-## Tools & Packages
+## Tools
 
-- **R**
-- **GEOquery** — GEO data retrieval
-- **limma** — Differential expression analysis
-- **EnhancedVolcano** — Volcano plot
-- **pheatmap** — Heatmap visualization
-- **clusterProfiler** — GO and KEGG enrichment
+R, GEOquery, limma, hgu133plus2.db, EnhancedVolcano, pheatmap, clusterProfiler, org.Hs.eg.db
 
 ---
 
 ## How to Run
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/repo-name.git
 cd repo-name
 ```
-
-Then in R:
 
 ```r
 source("main_script.R")
@@ -96,4 +86,4 @@ source("main_script.R")
 
 ## Key Insight
 
-The analysis identifies significant gene expression changes between Alzheimer's and control brain tissue. Enriched biological processes point to disrupted neuronal function and elevated cellular stress, while KEGG results highlight affected neurodegenerative and metabolic pathways as hallmarks of disease.
+The analysis identifies 16,454 dysregulated genes in AD brain tissue. Enrichment results consistently point to synaptic vesicle dysfunction, mitochondrial energy failure, and neuroinflammation as core mechanisms. The Alzheimer disease KEGG pathway ranks among the top enriched terms, directly validating the experimental findings.
