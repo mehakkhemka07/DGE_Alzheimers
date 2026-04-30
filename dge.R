@@ -1,3 +1,4 @@
+# 0. Install Packages (only if missing)
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
@@ -16,7 +17,6 @@ for (pkg in bioc_pkgs) {
 }
 
 # 1. Load Libraries
-
 library(GEOquery)
 library(limma)
 library(dplyr)
@@ -28,36 +28,61 @@ library(org.Hs.eg.db)
 library(hgu133plus2.db)
 library(AnnotationDbi)
 
+# ===============================
 # 2. Load Data
-
+# ===============================
 gse  <- getGEO("GSE5281", GSEMatrix = TRUE)
 eset <- gse[[1]]
+
 expr  <- exprs(eset)
 pheno <- pData(eset)
 
+# FIX 1: Log2 transform if data is on raw intensity scale
+if (max(expr, na.rm = TRUE) > 100) {
+  expr <- log2(expr + 1)
+  message("Log2 transformation applied.")
+}
 
 # 3. Define Groups
-
 group <- factor(ifelse(grepl("control", pheno$title, ignore.case = TRUE),
                        "control", "affected"))
+
+# FIX 2: Remove PCA outliers before analysis
+pca_pre <- prcomp(t(expr), scale. = TRUE)
+pc1     <- pca_pre$x[, 1]
+
+outlier_idx <- which(abs(pc1 - mean(pc1)) > 3 * sd(pc1))
+
+if (length(outlier_idx) > 0) {
+  message("Outlier samples removed (", length(outlier_idx), "): ",
+          paste(colnames(expr)[outlier_idx], collapse = ", "))
+  expr  <- expr[, -outlier_idx]
+  group <- group[-outlier_idx]
+} else {
+  message("No outliers detected.")
+}
+
+# 4. Design Matrix
 design <- model.matrix(~ 0 + group)
 colnames(design) <- levels(group)
 
-
-# 4. Differential Expression
+# 5. Differential Expression
 fit <- lmFit(expr, design)
+
 contrast.matrix <- makeContrasts(
   affected_vs_control = affected - control,
   levels = design
 )
+
 fit2 <- contrasts.fit(fit, contrast.matrix)
 fit2 <- eBayes(fit2)
+
 deg <- topTable(fit2,
                 coef          = "affected_vs_control",
                 number        = Inf,
                 adjust.method = "BH")
-# 5. Filter DEGs
-# Full filtered list (for heatmap, volcano, CSV)
+
+# 6. Filter DEGs
 deg_filtered <- deg %>%
   filter(adj.P.Val < 0.05 & abs(logFC) > 1)
 
@@ -65,14 +90,13 @@ message("Total DEGs after filtering: ", nrow(deg_filtered))
 write.csv(deg_filtered, "DEGs.csv")
 
 # Top 500 by adj p-value for enrichment
-# (16k+ genes = ~46% of universe; enrichment needs a focused list)
 deg_for_enrich <- deg_filtered %>%
   arrange(adj.P.Val) %>%
   head(500)
 
 message("Genes submitted for enrichment: ", nrow(deg_for_enrich))
 
-# 6. Volcano Plot
+# 7. Volcano Plot (FIX 1 applied - x-axis now in normal log2FC range)
 png("volcano.png", 800, 600)
 EnhancedVolcano(deg,
                 lab      = rownames(deg),
@@ -84,7 +108,7 @@ EnhancedVolcano(deg,
 dev.off()
 message("volcano.png saved.")
 
-# 7. PCA Plot
+# 8. PCA Plot (FIX 2 applied - outliers removed)
 pca_result <- prcomp(t(expr), scale. = TRUE)
 
 pca_df <- data.frame(
@@ -97,15 +121,25 @@ ggsave("PCA_plot.png",
        ggplot(pca_df, aes(PC1, PC2, color = Group)) +
          geom_point(size = 3, alpha = 0.8) +
          theme_minimal() +
-         labs(title = "PCA Plot", x = "PC1", y = "PC2"))
+         labs(title = "PCA Plot (outliers removed)", x = "PC1", y = "PC2"))
 
 message("PCA_plot.png saved.")
 
-# 8. Heatmap
+# 9. Heatmap (FIX 3 - gene symbols on y-axis)
 if (nrow(deg_filtered) > 0) {
   top_genes    <- intersect(rownames(expr), rownames(deg_filtered))[1:min(50, nrow(deg_filtered))]
   heatmap_data <- t(scale(t(expr[top_genes, ])))
   heatmap_data <- na.omit(heatmap_data)
+  
+  # Map probe IDs to gene symbols
+  symbol_labels <- mapIds(hgu133plus2.db,
+                          keys      = rownames(heatmap_data),
+                          column    = "SYMBOL",
+                          keytype   = "PROBEID",
+                          multiVals = "first")
+  # Fall back to probe ID where no symbol found
+  symbol_labels[is.na(symbol_labels)] <- rownames(heatmap_data)[is.na(symbol_labels)]
+  rownames(heatmap_data) <- symbol_labels
   
   annotation_col <- data.frame(Group = group)
   rownames(annotation_col) <- colnames(expr)
@@ -121,8 +155,8 @@ if (nrow(deg_filtered) > 0) {
   message("No genes for heatmap.")
 }
 
-# 9. Probe -> Symbol -> Entrez
-# --- Background universe: ALL expressed probes ---
+# 10. Probe -> Symbol -> Entrez
+# Background universe: ALL expressed probes
 all_symbols_raw <- mapIds(hgu133plus2.db,
                           keys      = rownames(expr),
                           column    = "SYMBOL",
@@ -136,7 +170,7 @@ universe_ids <- bitr(all_symbols,
                      OrgDb    = org.Hs.eg.db)
 message("Universe size (Entrez IDs): ", nrow(universe_ids))
 
-# --- DEG list: top 500 focused gene set ---
+# DEG list: top 500 focused gene set
 deg_symbols_raw <- mapIds(hgu133plus2.db,
                           keys      = rownames(deg_for_enrich),
                           column    = "SYMBOL",
@@ -151,7 +185,7 @@ gene_ids <- bitr(deg_symbols,
                  OrgDb    = org.Hs.eg.db)
 message("DEG Entrez IDs for enrichment: ", nrow(gene_ids))
 
-# 10. GO Enrichment
+# 11. GO Enrichment
 if (!is.null(gene_ids) && nrow(gene_ids) > 0) {
   
   ego <- enrichGO(gene          = gene_ids$ENTREZID,
@@ -180,7 +214,8 @@ if (!is.null(gene_ids) && nrow(gene_ids) > 0) {
 } else {
   message("Gene ID conversion failed — check probe mapping.")
 }
-# 11. KEGG Enrichment
+
+# 12. KEGG Enrichment
 if (!is.null(gene_ids) && nrow(gene_ids) > 0) {
   
   kegg <- tryCatch(
